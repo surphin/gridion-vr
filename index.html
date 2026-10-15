@@ -97,14 +97,16 @@ addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);cam.aspect=inne
 for(let i=0;i<2;i++){const c=R.xr.getController(i);
   // Detailed stylized receiver glove with articulated finger segments; driven by controller trigger/grip.
   const glove=new T.Group(),gloveMat=new T.MeshStandardMaterial({color:'#263b2b',roughness:.72}),stitchMat=new T.MeshStandardMaterial({color:'#e5e1d2',roughness:.8});
-  const palm=new T.Mesh(new T.SphereGeometry(.057,14,10),gloveMat);palm.scale.set(1.02,.62,1.28);palm.position.set(0,-.012,-.075);glove.add(palm);
+  const palm=new T.Mesh(new T.SphereGeometry(.057,18,12),gloveMat);palm.scale.set(1.08,.66,1.32);palm.position.set(0,-.012,-.075);glove.add(palm);
+  const backPlate=new T.Mesh(new T.SphereGeometry(.045,14,10),new T.MeshStandardMaterial({color:'#354b36',roughness:.6,metalness:.05}));backPlate.scale.set(1.05,.22,1.05);backPlate.position.set(0,.018,-.082);glove.add(backPlate);
+  const knuckleMat=new T.MeshStandardMaterial({color:'#52634a',roughness:.78});for(let k=0;k<4;k++){const kn=new T.Mesh(new T.SphereGeometry(.012,9,7),knuckleMat);kn.scale.set(1,.75,1.15);kn.position.set((k-1.5)*.025,.018,-.112);glove.add(kn);}
   const fingers=[];
   for(let f=0;f<4;f++){
     const root=new T.Group();root.position.set((f-1.5)*.025,-.002,-.115);glove.add(root);
     const len=f===3?.052:.064,seg1=new T.Mesh(new T.CylinderGeometry(.009,.009,.045,6),gloveMat);seg1.rotation.x=Math.PI/2;seg1.position.z=-len*.22;root.add(seg1);
     const joint=new T.Group();joint.position.z=-len*.48;root.add(joint);
     const seg2=new T.Mesh(new T.CylinderGeometry(.008,.008,.041,6),gloveMat);seg2.rotation.x=Math.PI/2;seg2.position.z=-.025;joint.add(seg2);
-    const tip=new T.Mesh(new T.SphereGeometry(.009,8,6),gloveMat);tip.position.z=-.044;joint.add(tip);
+    const tip=new T.Mesh(new T.SphereGeometry(.0095,10,7),gloveMat);tip.position.z=-.044;joint.add(tip);const nail=new T.Mesh(new T.BoxGeometry(.009,.002,.012),stitchMat);nail.position.set(0,.007,-.044);joint.add(nail);
     fingers.push({root,joint,baseZ:(f-1.5)*.025});
   }
   const thumbRoot=new T.Group();thumbRoot.position.set(-.052,-.012,-.075);thumbRoot.rotation.y=-.6;glove.add(thumbRoot);
@@ -124,12 +126,16 @@ function bx(w,h,d,c,x,y,z,par){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c
 function limb(par,px,py,w,l,c){const g=new T.Group();g.position.set(px,py,0);bx(w,l,w,c,0,-l/2,0,g);par.add(g);return g;}
 function mk(c){const g=new T.Group(),b=new T.Group();g.add(b);g.b=b;
   bx(.7,.75,.4,c,0,1.2,0,b);bx(1,.28,.5,c,0,1.55,0,b);bx(.62,.3,.38,'#f2f2f2',0,.78,0,b);
+  const bib=new T.Mesh(new T.BoxGeometry(.28,.28,.018),new T.MeshStandardMaterial({color:'#f4f0d9',roughness:.65}));bib.position.set(0,1.23,.211);b.add(bib);
+  const numberCanvas=document.createElement('canvas');numberCanvas.width=128;numberCanvas.height=128;const nc=numberCanvas.getContext('2d');nc.fillStyle='#f4f0d9';nc.fillRect(0,0,128,128);nc.fillStyle=c;nc.font='bold 92px sans-serif';nc.textAlign='center';nc.textBaseline='middle';nc.fillText(String(10+Math.floor(Math.random()*80)),64,67);const num=new T.Mesh(new T.PlaneGeometry(.25,.25),new T.MeshBasicMaterial({map:new T.CanvasTexture(numberCanvas),transparent:true}));num.position.set(0,1.23,.224);b.add(num);
   // Layered shoulder pads and chest piping make players read better from VR distance.
   const padMat=mat(c,.55);const padL=new T.Mesh(new T.SphereGeometry(.31,10,8),padMat);padL.scale.set(1,.55,.8);padL.position.set(-.39,1.55,0);b.add(padL);const padR=padL.clone();padR.position.x=.39;b.add(padR);
   const stripe=new T.Mesh(new T.BoxGeometry(.08,.035,.43),new T.MeshStandardMaterial({color:'#f4f0d9',roughness:.6}));stripe.position.set(0,1.58,-.01);b.add(stripe);
   const h=new T.Group();h.position.set(0,1.98,0);b.add(h);
-  const hm=new T.Mesh(new T.SphereGeometry(.27,14,10),mat(c,.35));hm.scale.set(1,1.05,1.12);hm.castShadow=true;h.add(hm);
-  bx(.36,.06,.08,'#e6e6e6',0,-.08,.3,h);bx(.05,.22,.08,'#e6e6e6',0,-.03,.3,h);
+  const helmetMat=new T.MeshStandardMaterial({color:c,roughness:.34,metalness:.12});const hm=new T.Mesh(new T.SphereGeometry(.275,18,14),helmetMat);hm.scale.set(1,1.02,1.12);hm.castShadow=true;h.add(hm);
+  const helmetRim=new T.Mesh(new T.TorusGeometry(.235,.018,7,20),new T.MeshStandardMaterial({color:'#e8e7df',metalness:.35,roughness:.4}));helmetRim.position.y=-.075;helmetRim.rotation.x=Math.PI/2;h.add(helmetRim);
+  const cageMat=new T.MeshStandardMaterial({color:'#d8dbe0',metalness:.62,roughness:.32});const cageTop=new T.Mesh(new T.TorusGeometry(.19,.012,5,16,Math.PI),cageMat);cageTop.position.set(0,-.095,.27);cageTop.rotation.z=Math.PI;h.add(cageTop);
+  for(const xx of [-.13,-.065,0,.065,.13]){const bar=new T.Mesh(new T.CylinderGeometry(.009,.009,.22,6),cageMat);bar.position.set(xx,-.13,.31);bar.rotation.z=xx*1.5;h.add(bar);}
   const face=new T.Mesh(new T.TorusGeometry(.19,.018,5,12,Math.PI),new T.MeshStandardMaterial({color:'#d9b44a',metalness:.35,roughness:.45}));face.position.set(0,-.08,.29);face.rotation.z=Math.PI;h.add(face);
   g.aL=limb(b,-.6,1.58,.2,.8,'#d9a97e');g.aR=limb(b,.6,1.58,.2,.8,'#d9a97e');bx(.25,.38,.25,c,0,-.2,0,g.aL);bx(.25,.38,.25,c,0,-.2,0,g.aR);
   g.lL=limb(b,-.2,.85,.3,.85,'#f2f2f2');g.lR=limb(b,.2,.85,.3,.85,'#f2f2f2');bx(.32,.12,.42,'#222222',0,-.8,.05,g.lL);bx(.32,.12,.42,'#222222',0,-.8,.05,g.lR);
@@ -212,13 +218,13 @@ function startPlay(){
   clearEnts();losL.position.z=G.los;fdL.position.z=Math.max(-50,G.los-G.togo);G.phase='pre';G.t=0;G.carrier=null;G.pass=null;G.dive=0;G.spin=0;G.truck=0;G.tackle=0;G.intWindow=0;G.cool=0;G.press=0;G.msg='';
   const L=G.los,offC=G.mode==='def'?G.opp.color:G.you.color,defC=G.mode==='def'?G.you.color:G.opp.color;
   G.off=[];G.def=[];
-  for(let i=0;i<5;i++){const p=mk(offC);p.position.set(-4+2*i,0,L+1.2);G.off.push(p);}
+  for(let i=0;i<5;i++){const p=mk(offC);p.team='offense';p.position.set(-4+2*i,0,L+1.2);G.off.push(p);}
   G.qb=mk(offC);G.qb.position.set(0,0,L+5);G.rb=mk(offC);G.rb.position.set(0,0,L+7);
   G.wr=mk(offC);G.wr.position.set(18,0,L+.5);G.wr2=mk(offC);G.wr2.position.set(-18,0,L+.5);
   G.te=mk(offC);G.te.position.set(8,0,L+1.2);G.off.push(G.qb,G.rb,G.wr,G.wr2,G.te);G.rec=[G.wr2,G.te,G.wr];G.play=PLAYS[G.pi];if(G.mode==='qb')G.rec.forEach((r,i)=>{const o=new T.Mesh(new T.SphereGeometry(.25,10,8),new T.MeshBasicMaterial({color:['#ff4d4d','#4da3ff','#ffd34d'][i]}));o.position.y=2.6;r.add(o);});
-  [-3,-1,1,3].forEach(x=>{const p=mk(defC);p.position.set(x,0,L-1.5);p.role='dl';G.def.push(p);});
-  [-6,0,6].forEach(x=>{const p=mk(defC);p.position.set(x,0,L-5);p.role='lb';p.hx=x;G.def.push(p);});
-  [-18,-8,8,18].forEach((x,i)=>{const p=mk(defC);p.position.set(x,0,L-11);p.role='db';p.i=i;p.hx=x;G.def.push(p);});
+  [-3,-1,1,3].forEach(x=>{const p=mk(defC);p.team='defense';p.position.set(x,0,L-1.5);p.role='dl';G.def.push(p);});
+  [-6,0,6].forEach(x=>{const p=mk(defC);p.team='defense';p.position.set(x,0,L-5);p.role='lb';p.hx=x;G.def.push(p);});
+  [-18,-8,8,18].forEach((x,i)=>{const p=mk(defC);p.team='defense';p.position.set(x,0,L-11);p.role='db';p.i=i;p.hx=x;G.def.push(p);});
   G.cov=Math.random()<.5?'man':'zone';if(G.cov==='man')[[-18,-3],[18,-3],[8,-4],[0,-14]].forEach(([x,z],i)=>{const d=G.def[7+i];d.position.set(x,0,L+z);d.hx=x;});
   G.user=G.mode==='def'?G.def[5]:G.mode==='rb'?G.rb:G.mode==='qb'?G.qb:G.wr;
   G.isPass=G.mode==='wr'||G.mode==='qb'?true:G.mode==='rb'?false:Math.random()<.5;
@@ -237,7 +243,7 @@ function throwTo(r,raw){if(!r||G.mode!=='qb'||G.phase!=='play'||!G.pass||G.pass.
   G.pass={s:'fly',pos:a,v:v,b:b,r:r,t0:G.t};G.qb.th=.45;buzz(.5,60);snd('whoosh');}
 function flyStep(dt){const P=G.pass,v=P.v;P.pos.x+=v.x*dt;P.pos.y+=v.y*dt;P.pos.z+=v.z*dt;v.y-=10.7*dt;{const dr=1-.06*dt;v.x*=dr;v.z*=dr;}ball.position.copy(P.pos);ball.rotation.y=Math.atan2(-v.z,v.x);ball.rotation.x+=dt*25;
   // Catch with either controller: hold trigger or grip and bring the glove within reach of the ball.
-  if(xr&&G.phase==='play'){for(let i=0;i<2;i++){const c=R.xr.getController(i),ss=R.xr.getSession();let grabbing=false;if(ss)for(const src of ss.inputSources){if(src.handedness!==c.userData.hand||!src.gamepad)continue;const b=src.gamepad.buttons||[];grabbing=!!((b[0]&&b[0].pressed)||(b[1]&&b[1].pressed));}const hp=handPos(i);if(grabbing&&hp.distanceTo(P.pos)<.38&&P.pos.y>.25){G.hand=i;G.holding=i;P.pos.copy(hp);ball.position.copy(hp);buzz(.85,75);snd('whoosh');if(G.mode==='qb'){G.pass={s:'drop'};hud('Caught! Hold trigger, swing, release');}else{G.carrier=G.user;G.pass.s='done';hud('Caught! Run with the ball');}return false;}}}
+  if(xr&&G.phase==='play'){for(let i=0;i<2;i++){const c=R.xr.getController(i),ss=R.xr.getSession();let grabbing=false;if(ss)for(const src of ss.inputSources){if(src.handedness!==c.userData.hand||!src.gamepad)continue;const b=src.gamepad.buttons||[];grabbing=!!((b[0]&&b[0].pressed)||(b[1]&&b[1].pressed));}const hp=handPos(i);if(grabbing&&hp.distanceTo(P.pos)<.38&&P.pos.y>.25){G.hand=i;G.holding=i;P.pos.copy(hp);ball.position.copy(hp);ball.visible=true;buzz(.85,75);snd('whoosh');if(G.mode==='qb'){G.pass={s:'drop'};hud('Caught! Hold trigger, swing, release');}else{G.carrier=G.user;G.pass.s='done';hud('Caught! Run with the ball');}return false;}}}
   if(P.pos.y<3.3){for(const d of G.def){if(!d.rolled&&dist(d.position,P.pos)<1.4){d.rolled=1;if(Math.random()<D.int){d.ct=.5;end('Intercepted',0,true);return true;}}}
     for(const r of G.rec){if(dist(r.position,P.pos)<D.catchR&&P.pos.y>.3){r.ct=.6;G.carrier=r;P.s='done';buzz(.8,90);snd('whoosh');return false;}}}
   if(P.pos.y<.25||Math.abs(P.pos.x)>27||P.pos.z<-62||G.t-P.t0>4){end('Incomplete',0);return true;}return false;}
@@ -252,9 +258,9 @@ function vrThrow(i){G.holding=-1;if(G.mode!=='qb'||G.phase!=='play'||!G.pass||G.
   const d=raw.clone();d.y=0;if(d.length()<.01)return;d.normalize();
   let best=null,ba=.8;G.rec.forEach(r=>{const dx=r.position.x-G.qb.position.x,dz=r.position.z-G.qb.position.z,m=Math.hypot(dx,dz)||1,dot=(dx*d.x+dz*d.z)/m;if(dot>ba){ba=dot;best=r;}});
   if(best&&CFG.assist>0)throwTo(best,raw);else throwFree(raw,i);}
-function handoff(){if(G.mode==='qb'&&G.phase==='play'&&G.pass&&G.pass.s==='drop'){G.carrier=G.rb;G.pass.s='done';buzz(.4,50);hud('Handoff');}}
+function handoff(){if(G.mode==='qb'&&G.phase==='play'&&G.pass&&G.pass.s==='drop'){G.carrier=G.rb;G.pass.s='done';if(xr&&G.mode==='rb'){G.hand=domHand();G.holding=G.hand;}buzz(.4,50);hud('Handoff');}}
 function gameOver(){G.phase='final';const w=G.sy>G.sp?'You win':G.sy<G.sp?'You lose':'Tie game';hud('Final - '+w+' '+G.sy+'-'+G.sp);openMenu();}
-function snap(){G.phase='play';G.t=0;if(G.mode==='rb'){G.carrier=G.rb;ball.visible=true;}hud(xr&&G.mode==='qb'?'Hold trigger, swing, release':'Play live');}
+function snap(){G.phase='play';G.t=0;if(G.mode==='rb'){G.carrier=G.rb;ball.visible=true;if(xr){G.hand=domHand();G.holding=G.hand;ball.position.copy(handPos(G.holding));}hud(xr?'Ball in hand — run and use action to truck':'Play live');return;}hud(xr&&G.mode==='qb'?'Hold trigger, swing, release':'Play live');}
 function end(msg,gain,turnover,td){
   if(G.carrier&&/ackle/i.test(msg))G.carrier.fall=.01;if(msg==='Sacked'&&G.qb)G.qb.fall=.01;G.clk-=6;snd(td?'cheer':/ackle|ack/i.test(msg)?'thud':'whistle');G.phase='over';G.t=0;G.carrier=null;let m=msg;
   if(td){if(G.mode==='def')G.sp+=7;else G.sy+=7;m=msg+' - touchdown!';G.los=25;G.down=1;G.togo=10;}
@@ -272,7 +278,7 @@ function act(){
   } else if(G.mode==='rb'){
     if(G.carrier===G.rb||G.carrier===G.user){G.truck=.8;G.spin=0;G.cool=2.0;hud('TRUCKING!');buzz(.5,60);}
     else {G.spin=.5;G.cool=1.8;hud('Juke!');}
-  } else if(G.mode==='wr'){G.press=.5;G.user.ct=.5;G.intWindow=.4;G.cool=.7;}}
+  } else if(G.mode==='wr'){if(G.carrier===G.user){G.truck=.85;G.cool=1.15;hud('POWER PUSH!');buzz(.5,60);}else{G.press=.5;G.user.ct=.5;G.intWindow=.4;G.cool=.7;}} else {if(G.carrier===G.user){G.truck=.85;G.cool=1.15;hud('POWER PUSH!');buzz(.5,60);}else{G.press=.45;G.truck=.45;G.cool=1.0;hud('PUSH!');buzz(.35,45);}}}
 /* ---------- Update ---------- */
 const fwd=new T.Vector3();
 function update(dt){
@@ -292,7 +298,8 @@ function update(dt){
   const dsp=G.mode==='def'?7:(6.4+(G.opp.ovr-70)*.07)*D.spd,usp=G.mode==='def'?(G.dive>0?11:7.2):(G.spin>0?5.5:7.8);
   if(G.phase==='play'||(G.phase==='pre'&&G.mode!=='qb')){
     let sprint=false;const ss=R.xr.getSession();if(xr&&ss)for(const src of ss.inputSources){if(src.handedness==='left'&&src.gamepad&&src.gamepad.buttons){const b=src.gamepad.buttons;sprint=!!(b[3]&&b[3].pressed);}}
-    const stick=Math.min(1,Math.hypot(ax,az)),targetSpeed=usp*(sprint?1.42:1)*stick;
+    let swingBoost=1;if(xr&&G.hist){let swing=0;for(let hi=0;hi<2;hi++){const vv=handVel(hi);if(vv)swing=Math.max(swing,Math.hypot(vv.x,vv.y,vv.z));}swingBoost=1+Math.min(.72,Math.max(0,(swing-.65)*.19));}
+    const stick=Math.min(1,Math.hypot(ax,az)),targetSpeed=usp*(sprint?1.32:1)*swingBoost*stick;
     const targetX=stick>0?dx/Math.max(1e-4,Math.hypot(dx,dz))*targetSpeed:0,targetZ=stick>0?dz/Math.max(1e-4,Math.hypot(dx,dz))*targetSpeed:0;
     const blend=1-Math.exp(-dt*(stick>0?9:6));G.locoVel.x+=(targetX-G.locoVel.x)*blend;G.locoVel.z+=(targetZ-G.locoVel.z)*blend;
     u.position.x+=G.locoVel.x*dt;u.position.z+=G.locoVel.z*dt;
@@ -336,7 +343,7 @@ function update(dt){
       }else if(G.pass.s==='fly'){if(flyStep(dt))return;}
     }
     // ball follows carrier
-    const cc=G.carrier;if(cc){ball.position.set(cc.position.x,1.2,cc.position.z);}
+    const cc=G.carrier;if(cc){if(xr&&cc===u&&G.holding>=0&&G.phase==='play'&&(G.mode==='rb'||G.mode==='qb')){ball.visible=true;ball.position.copy(handPos(G.holding));}else{ball.visible=true;ball.position.set(cc.position.x,1.2,cc.position.z);}}
     if(!cc&&G.isPass)G.off.slice(0,5).forEach(o=>{let nd=null,bd=99;G.def.forEach(d=>{if(d.role==='dl'||d.role==='lb'){const q=Math.abs(d.position.x-o.position.x)+Math.abs(d.position.z-o.position.z)*.5;if(q<bd){bd=q;nd=d;}}});if(nd&&Math.abs(nd.position.x-o.position.x)>.2)mv(o,nd.position.x-o.position.x,0,4,dt);});
     // defense AI
     G.def.forEach(d=>{if(d===u&&(G.mode==='def'))return;if(d.stun>0)return;
@@ -347,17 +354,46 @@ function update(dt){
       else if(G.cov==='man'&&d.role==='db'&&d.i<3){const w=[G.wr2,G.wr,G.te][d.i];tx=w.position.x;tz=w.position.z-2;}
       else{const zx=d.hx,zz=G.los-(d.role==='lb'?7:d.role==='db'?13:3),w=G.rec.find(r=>dist(r.position,{x:zx,z:zz})<6);if(w&&G.t>1){tx=w.position.x;tz=w.position.z-1.5;}else{tx=zx;tz=zz;}}
       const blk=!cc&&G.isPass&&d.role==='dl'&&G.off.slice(0,5).some(o=>dist(o.position,d.position)<1.2);mv(d,tx-d.position.x,tz-d.position.z,blk?dsp*D.blk:dsp,dt);});
-    // tackles, boundaries, scoring
+    // Player collision and blocking: keep bodies from passing through one another.
+    // Offensive linemen engage the nearest defensive lineman and form a real pocket.
+    if(G.isPass && !cc){
+      for(let i=0;i<5;i++){
+        const o=G.off[i]; let nd=null,bd=99;
+        for(const d of G.def){if(d.role!=='dl'&&d.role!=='lb')continue;const q=dist(o.position,d.position);if(q<bd){bd=q;nd=d;}}
+        if(nd && bd<2.35){
+          const vx=nd.position.x-o.position.x,vz=nd.position.z-o.position.z,ln=Math.hypot(vx,vz)||1;
+          // Keep a close shoulder engagement and slow the defender while the blocker remains between him and the QB.
+          if(bd>1.02){o.position.x+=vx/ln*Math.min(.12,(bd-1.02)*.38);o.position.z+=vz/ln*Math.min(.12,(bd-1.02)*.38);}
+          nd.position.x-=vx/ln*.035;nd.position.z-=vz/ln*.035;nd.stun=Math.max(nd.stun||0,.12);
+        }
+      }
+    }
+    // Resolve overlap between all AI players and the user-controlled player.
+    // The small separation radius creates contact without letting models ghost through each other.
+    const roster=[...G.off,...G.def];
+    for(let i=0;i<roster.length;i++){
+      const a=roster[i];
+      for(let j=i+1;j<roster.length;j++){
+        const b=roster[j]; const dx=b.position.x-a.position.x,dz=b.position.z-a.position.z;
+        const dd=Math.hypot(dx,dz),min=(a.team&&b.team&&a.team!==b.team)?1.12:1.02;
+        if(dd>0.001 && dd<min){const push=(min-dd)*.58, nx=dx/dd,nz=dz/dd;
+          // Separate overlapping bodies every frame; contact is resolved horizontally so players don't ghost through one another.
+          a.position.x-=nx*push;a.position.z-=nz*push;b.position.x+=nx*push;b.position.z+=nz*push;
+          if(dd<.62){a.vx=(a.vx||0)*.7;a.vz=(a.vz||0)*.7;b.vx=(b.vx||0)*.7;b.vz=(b.vz||0)*.7;}
+        }
+      }
+    }
+    // Tackles, boundaries, scoring
     if(cc){
       const px=cc.position.x;
       if(Math.abs(px)>=26)return end('Out of bounds',G.los-cc.position.z);
       if(cc.position.z<=-50)return end('Score',G.los-cc.position.z,false,true);
       // Trucking: an activated ball carrier knocks nearby defenders off their line.
       if(G.truck>0&&(cc===u||G.mode==='rb')){
-        for(const d of G.def){const q=dist(d.position,cc.position);if(q<2.05&&d.stun<=0){
+        for(const d of G.def){const q=dist(d.position,cc.position);if(q<2.45&&d.stun<=0){
           const away=new T.Vector3(d.position.x-cc.position.x,0,d.position.z-cc.position.z);
           if(away.length()<.01)away.set(Math.random()-.5,0,1);
-          away.normalize();d.position.x+=away.x*1.15;d.position.z+=away.z*1.15;d.dv=.7;d.stun=.85;
+          away.normalize();d.position.x+=away.x*1.65;d.position.z+=away.z*1.65;d.dv=.9;d.stun=1.0;
         }}
       }
       if(!(cc===u&&G.spin>0)){
