@@ -101,16 +101,16 @@ for(let i=0;i<2;i++){const c=R.xr.getController(i);
   const fingers=[];
   for(let f=0;f<4;f++){
     const root=new T.Group();root.position.set((f-1.5)*.025,-.002,-.115);glove.add(root);
-    const len=f===3?.052:.064,seg1=new T.Mesh(new T.CapsuleGeometry(.009,.027,3,6),gloveMat);seg1.rotation.x=Math.PI/2;seg1.position.z=-len*.22;root.add(seg1);
+    const len=f===3?.052:.064,seg1=new T.Mesh(new T.CylinderGeometry(.009,.009,.045,6),gloveMat);seg1.rotation.x=Math.PI/2;seg1.position.z=-len*.22;root.add(seg1);
     const joint=new T.Group();joint.position.z=-len*.48;root.add(joint);
-    const seg2=new T.Mesh(new T.CapsuleGeometry(.008,.025,3,6),gloveMat);seg2.rotation.x=Math.PI/2;seg2.position.z=-.025;joint.add(seg2);
+    const seg2=new T.Mesh(new T.CylinderGeometry(.008,.008,.041,6),gloveMat);seg2.rotation.x=Math.PI/2;seg2.position.z=-.025;joint.add(seg2);
     const tip=new T.Mesh(new T.SphereGeometry(.009,8,6),gloveMat);tip.position.z=-.044;joint.add(tip);
     fingers.push({root,joint,baseZ:(f-1.5)*.025});
   }
   const thumbRoot=new T.Group();thumbRoot.position.set(-.052,-.012,-.075);thumbRoot.rotation.y=-.6;glove.add(thumbRoot);
-  const thumb1=new T.Mesh(new T.CapsuleGeometry(.011,.035,3,7),gloveMat);thumb1.rotation.x=Math.PI/2;thumb1.position.z=-.018;thumbRoot.add(thumb1);
+  const thumb1=new T.Mesh(new T.CylinderGeometry(.011,.011,.053,7),gloveMat);thumb1.rotation.x=Math.PI/2;thumb1.position.z=-.018;thumbRoot.add(thumb1);
   const thumbJoint=new T.Group();thumbJoint.position.z=-.038;thumbRoot.add(thumbJoint);
-  const thumb2=new T.Mesh(new T.CapsuleGeometry(.009,.028,3,7),gloveMat);thumb2.rotation.x=Math.PI/2;thumb2.position.z=-.018;thumbJoint.add(thumb2);
+  const thumb2=new T.Mesh(new T.CylinderGeometry(.009,.009,.044,7),gloveMat);thumb2.rotation.x=Math.PI/2;thumb2.position.z=-.018;thumbJoint.add(thumb2);
   const cuff=new T.Mesh(new T.CylinderGeometry(.043,.05,.075,12),new T.MeshStandardMaterial({color:'#d9b44a',roughness:.7}));cuff.rotation.x=Math.PI/2;cuff.position.z=.005;glove.add(cuff);
   const cuffBand=new T.Mesh(new T.TorusGeometry(.046,.004,5,16),stitchMat);cuffBand.position.z=-.018;glove.add(cuffBand);
   c.add(glove);c.userData.glove=glove;c.userData.fingers=fingers;c.userData.thumbRoot=thumbRoot;c.userData.thumbJoint=thumbJoint;
@@ -330,7 +330,7 @@ function update(dt){
         if(k>=1){const bb=G.pass.b;
           if(G.mode==='wr'){if(G.press>0&&dist(u.position,bb)<2.6){G.carrier=u;}else return end('Incomplete',0);}
           else{const near=G.def.some(d=>d!==u&&dist(d.position,bb)<1.4);
-            if(G.mode==='qb'&&dist(G.pass.r.position,bb)>3)return end('Incomplete',0);if(near&&Math.random()<.45)return G.mode==='qb'?end('Intercepted',0,true):end('Incomplete',0);
+            if(G.mode==='qb'&&G.pass.r&&dist(G.pass.r.position,bb)>3)return end('Incomplete',0);if(near&&Math.random()<.45)return G.mode==='qb'?end('Intercepted',0,true):end('Incomplete',0);
             const r=G.pass.r||G.wr;r.position.x=bb.x;r.position.z=bb.z;G.carrier=r;}
           G.pass.s='done';}
       }else if(G.pass.s==='fly'){if(flyStep(dt))return;}
@@ -354,7 +354,7 @@ function update(dt){
       if(cc.position.z<=-50)return end('Score',G.los-cc.position.z,false,true);
       // Trucking: an activated ball carrier knocks nearby defenders off their line.
       if(G.truck>0&&(cc===u||G.mode==='rb')){
-        for(const d of G.def){const q=dist(d.position,cc.position);if(q<2.05){
+        for(const d of G.def){const q=dist(d.position,cc.position);if(q<2.05&&d.stun<=0){
           const away=new T.Vector3(d.position.x-cc.position.x,0,d.position.z-cc.position.z);
           if(away.length()<.01)away.set(Math.random()-.5,0,1);
           away.normalize();d.position.x+=away.x*1.15;d.position.z+=away.z*1.15;d.dv=.7;d.stun=.85;
