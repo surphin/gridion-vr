@@ -1,24 +1,30 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Gridiron VR Prototype</title>
+<title>Gridiron VR — Ultimate Edition</title>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#0d1f14;font-family:Georgia,serif;color:#f3efe2}
-#menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,22,14,.88);z-index:5}
-#box{width:min(440px,92vw);padding:24px;max-height:92vh;overflow:auto}
-h1{font-size:34px;margin:0 0 4px}p{margin:0 0 16px;opacity:.8;line-height:1.4}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#07110c;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#f5f7ef}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 15%,rgba(45,125,71,.28),transparent 58%),linear-gradient(145deg,#07110c,#10281a 55%,#08130d)}
+#menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(5,17,10,.72),rgba(3,8,5,.94));backdrop-filter:blur(10px);z-index:5}
+#box{position:relative;width:min(520px,92vw);padding:clamp(22px,5vw,38px);max-height:92vh;overflow:auto;border:1px solid rgba(210,235,209,.2);border-radius:24px;background:linear-gradient(155deg,rgba(22,49,31,.96),rgba(7,19,12,.98));box-shadow:0 28px 100px #0009,inset 0 1px rgba(255,255,255,.08)}
+#box:before{content:"FIELD • VR FOOTBALL";display:inline-block;color:#d9b44a;font:800 11px/1 system-ui;letter-spacing:.22em;margin-bottom:14px}
+h1{font-size:clamp(34px,7vw,48px);letter-spacing:-.055em;line-height:1.02;margin:0 0 12px;background:linear-gradient(90deg,#fff,#c7e9ce);-webkit-background-clip:text;background-clip:text;color:transparent}
+p{margin:0 0 20px;color:#c5d3c6;line-height:1.6;font-size:14px}
 label{display:block;margin:12px 0 4px;font-size:15px}
-select,button,input{width:100%;padding:10px;font:inherit;border-radius:6px;border:1px solid #6b8f6e;background:#16301f;color:#f3efe2;box-sizing:border-box}
-button{background:#d9b44a;color:#1a1a10;border:0;font-weight:bold;margin-top:18px;cursor:pointer}
-small{display:block;margin-top:14px;opacity:.65;line-height:1.4}
+select,button,input{width:100%;padding:12px 14px;font:inherit;border-radius:10px;border:1px solid #41674a;background:#12291a;color:#f3efe2;box-sizing:border-box}
+select:focus,button:focus-visible{outline:2px solid #f3d56b;outline-offset:3px}
+button{background:linear-gradient(135deg,#f4d56a,#c69a2e);color:#172015;border:0;font-weight:850;margin-top:18px;cursor:pointer;box-shadow:0 8px 24px #d9b44a22;transition:transform .15s,filter .15s}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:active{transform:translateY(1px)}
+#err{color:#ffb4a9!important}#diag{color:#b7c9ba}
+small{display:block;margin-top:16px;color:#a6b9a8;line-height:1.55;font-size:11px}
 </style></head><body>
 <div id="menu"><div id="box">
 <h1>Gridiron VR</h1>
-<p>A VR football game: play quarterback, defense, running back or receiver. Put on your headset and press Enter VR, then choose your game on the floating menu using a controller laser and the trigger.</p>
-<button id="enter">Enter VR</button>
+<p>Take the field in quarterback, defense, running back, or receiver mode. Read the defense, make the play, and chase the end zone. Built for controller-based VR with throwing, catches, sprinting, and floating in-game controls.</p>
+<button id="enter">ENTER THE FIELD&nbsp; →</button>
 <div id="err" style="margin-top:12px;color:#ff9a8a;font-size:14px"></div>
 <div id="diag" style="margin-top:14px;font-size:14px;opacity:.85;line-height:1.6"></div>
-<small>Open this page in the Meta Quest Browser (or another WebXR browser) over HTTPS. It will not start inside a preview frame or from a plain http:// address. In VR: left stick moves (click for sprint), right stick turns, hold/release trigger to throw, grip hands off, and X or Y opens the menu. For smoother Quest performance, choose Low graphics in the floating menu.</small>
+<small>Open this page in the Meta Quest Browser (or another WebXR browser) over HTTPS. It will not start inside a preview frame or from a plain http:// address. In VR: left stick moves (click for sprint), right stick turns, hold/release trigger to throw, bring a glove close to the ball while holding trigger or grip to catch, and X or Y opens the menu. Defense action attempts tackles and interceptions; running-back action trucks nearby defenders. For smoother Quest performance, choose Low graphics in the floating menu.</small>
 </div></div>
 <div id="store" hidden>
 <select id="mode"><option value="qb">Quarterback</option><option value="def">Defense</option><option value="rb">Running back</option><option value="wr">Receiver</option></select>
@@ -47,14 +53,19 @@ const R=new T.WebGLRenderer({antialias:false,powerPreference:'high-performance'}
 /* Use the main Enter VR button below so there is only one session-entry control. */
 const S=new T.Scene();S.background=new T.Color('#9ec3e6');S.fog=new T.Fog('#cfdceb',120,260);
 const cam=new T.PerspectiveCamera(70,innerWidth/innerHeight,.1,300),rig=new T.Group();rig.add(cam);S.add(rig);
-S.add(new T.HemisphereLight('#dfe9ff','#3b5a3c',.85));
+S.add(new T.HemisphereLight('#e5efff','#35563a',.95));
+const fillLight=new T.DirectionalLight('#b7d9ff',.28);fillLight.position.set(-35,25,-20);S.add(fillLight);
 const sun=new T.DirectionalLight('#fff4e0',.9);sun.position.set(30,60,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
 {const q=sun.shadow.camera;q.left=-55;q.right=55;q.top=75;q.bottom=-75;q.near=1;q.far=160;}sun.shadow.bias=-.0005;S.add(sun);
 const sk=document.createElement('canvas');sk.width=4;sk.height=256;{const x=sk.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#2b5aa8');g.addColorStop(.55,'#8fb8e8');g.addColorStop(1,'#dfe9f2');x.fillStyle=g;x.fillRect(0,0,4,256);}
 S.add(new T.Mesh(new T.SphereGeometry(260,16,12),new T.MeshBasicMaterial({map:new T.CanvasTexture(sk),side:T.BackSide,fog:false})));
 const grass=new T.Mesh(new T.PlaneGeometry(70,150),new T.MeshStandardMaterial({color:'#ffffff',roughness:1}));grass.rotation.x=-Math.PI/2;grass.receiveShadow=true;S.add(grass);
 function paintField(top,bot){const W=512,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),px=W/70,py=H/150,Y=z=>(z+75)*py,L=8.35*px,FW=53.3*px;
-  for(let i=0;i<30;i++){x.fillStyle=i%2?'#2e7a38':'#348a3f';x.fillRect(0,i*H/30,W,H/30+1);}
+  for(let i=0;i<30;i++){x.fillStyle=i%2?'#2d7838':'#348640';x.fillRect(0,i*H/30,W,H/30+1);}
+  // Subtle alternating turf mowing bands add depth without expensive extra geometry.
+  for(let i=0;i<10;i++){x.fillStyle=i%2?'rgba(255,255,255,.018)':'rgba(0,0,0,.025)';x.fillRect(L+i*FW/10,Y(-50),FW/10,100*py);}
+  // Hash marks and yard markers improve field readability in headset.
+  x.fillStyle='rgba(255,255,255,.82)';for(let z=-50;z<=50;z+=1){if(z%5!==0){const yy=Y(z);x.fillRect(L+14*px,yy,1.3*px,1.4);x.fillRect(L+FW-14*px,yy,1.3*px,1.4);}}
   x.fillStyle=top.color;x.fillRect(L,Y(-60),FW,10*py);x.fillStyle=bot.color;x.fillRect(L,Y(50),FW,10*py);
   x.fillStyle='#fff';x.fillRect(L-2,Y(-60),4,120*py);x.fillRect(L+FW-2,Y(-60),4,120*py);
   for(let z=-50;z<=50;z+=5)x.fillRect(L,Y(z)-(z%10?1:2),FW,z%10?2:4);
@@ -71,6 +82,8 @@ const stMat=new T.MeshStandardMaterial({map:ct,roughness:1});
 for(let k=0;k<5;k++){const h=2+k*2.4;
   [-1,1].forEach(q=>{const a=new T.Mesh(new T.BoxGeometry(6,h,150),stMat);a.position.set(q*(38+k*5.5),h/2,0);S.add(a);const b=new T.Mesh(new T.BoxGeometry(100,h,6),stMat);b.position.set(0,h/2,q*(68+k*5.5));S.add(b);});}
 [[-66,-80],[66,-80],[-66,80],[66,80]].forEach(([x,z])=>{const a=new T.Mesh(new T.BoxGeometry(1,40,1),new T.MeshStandardMaterial({color:'#555'}));a.position.set(x,20,z);S.add(a);const b=new T.Mesh(new T.BoxGeometry(9,4,1),new T.MeshBasicMaterial({color:'#fffbe8'}));b.position.set(x,41,z);S.add(b);});
+// Gold goalposts at both ends of the field.
+for(const z of [-51,51]){const gm=new T.MeshStandardMaterial({color:'#f3c744',metalness:.35,roughness:.35});const base=new T.Mesh(new T.CylinderGeometry(.09,.13,2.5,8),gm);base.position.set(0,1.25,z);S.add(base);const upright=new T.Mesh(new T.CylinderGeometry(.055,.07,8,8),gm);upright.position.set(0,6,z);S.add(upright);const cross=new T.Mesh(new T.CylinderGeometry(.055,.055,6.5,8),gm);cross.rotation.z=Math.PI/2;cross.position.set(0,9.9,z);S.add(cross);for(const x of [-3.2,3.2]){const up=new T.Mesh(new T.CylinderGeometry(.045,.055,5,8),gm);up.position.set(x,12.3,z);S.add(up);}}
 const hc=document.createElement('canvas');hc.width=512;hc.height=128;
 const tex=new T.CanvasTexture(hc),hudM=new T.Mesh(new T.PlaneGeometry(.8,.2),new T.MeshBasicMaterial({map:tex,transparent:true,depthTest:false}));
 hudM.position.set(0,.3,-1);hudM.renderOrder=9;cam.add(hudM);
@@ -82,12 +95,25 @@ R.xr.addEventListener('sessionstart',()=>{xr=true;cam.position.set(0,0,0);cam.ro
 R.xr.addEventListener('sessionend',()=>{xr=false;DESK();$('menu').style.display='flex';closeMenu();G.paused=true;});
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
 for(let i=0;i<2;i++){const c=R.xr.getController(i);
-  // Simple, visible glove model follows the tracked controller (no hand-tracking API needed).
-  const glove=new T.Group(),gloveMat=new T.MeshStandardMaterial({color:'#263b2b',roughness:.82});
-  const palm=new T.Mesh(new T.SphereGeometry(.055,10,8),gloveMat);palm.scale.set(1,.62,1.25);palm.position.set(0,-.012,-.075);glove.add(palm);
-  for(let f=0;f<4;f++){const finger=new T.Mesh(new T.BoxGeometry(.018,.022,.075),gloveMat);finger.position.set((f-1.5)*.025,-.004,-.135);glove.add(finger);}
-  const thumb=new T.Mesh(new T.BoxGeometry(.025,.025,.065),gloveMat);thumb.position.set(-.06,-.012,-.075);thumb.rotation.y=-.45;glove.add(thumb);
-  const cuff=new T.Mesh(new T.CylinderGeometry(.045,.05,.07,10),new T.MeshStandardMaterial({color:'#d9b44a',roughness:.8}));cuff.rotation.x=Math.PI/2;cuff.position.z=.005;glove.add(cuff);c.add(glove);c.userData.glove=glove;
+  // Detailed stylized receiver glove with articulated finger segments; driven by controller trigger/grip.
+  const glove=new T.Group(),gloveMat=new T.MeshStandardMaterial({color:'#263b2b',roughness:.72}),stitchMat=new T.MeshStandardMaterial({color:'#e5e1d2',roughness:.8});
+  const palm=new T.Mesh(new T.SphereGeometry(.057,14,10),gloveMat);palm.scale.set(1.02,.62,1.28);palm.position.set(0,-.012,-.075);glove.add(palm);
+  const fingers=[];
+  for(let f=0;f<4;f++){
+    const root=new T.Group();root.position.set((f-1.5)*.025,-.002,-.115);glove.add(root);
+    const len=f===3?.052:.064,seg1=new T.Mesh(new T.CapsuleGeometry(.009,.027,3,6),gloveMat);seg1.rotation.x=Math.PI/2;seg1.position.z=-len*.22;root.add(seg1);
+    const joint=new T.Group();joint.position.z=-len*.48;root.add(joint);
+    const seg2=new T.Mesh(new T.CapsuleGeometry(.008,.025,3,6),gloveMat);seg2.rotation.x=Math.PI/2;seg2.position.z=-.025;joint.add(seg2);
+    const tip=new T.Mesh(new T.SphereGeometry(.009,8,6),gloveMat);tip.position.z=-.044;joint.add(tip);
+    fingers.push({root,joint,baseZ:(f-1.5)*.025});
+  }
+  const thumbRoot=new T.Group();thumbRoot.position.set(-.052,-.012,-.075);thumbRoot.rotation.y=-.6;glove.add(thumbRoot);
+  const thumb1=new T.Mesh(new T.CapsuleGeometry(.011,.035,3,7),gloveMat);thumb1.rotation.x=Math.PI/2;thumb1.position.z=-.018;thumbRoot.add(thumb1);
+  const thumbJoint=new T.Group();thumbJoint.position.z=-.038;thumbRoot.add(thumbJoint);
+  const thumb2=new T.Mesh(new T.CapsuleGeometry(.009,.028,3,7),gloveMat);thumb2.rotation.x=Math.PI/2;thumb2.position.z=-.018;thumbJoint.add(thumb2);
+  const cuff=new T.Mesh(new T.CylinderGeometry(.043,.05,.075,12),new T.MeshStandardMaterial({color:'#d9b44a',roughness:.7}));cuff.rotation.x=Math.PI/2;cuff.position.z=.005;glove.add(cuff);
+  const cuffBand=new T.Mesh(new T.TorusGeometry(.046,.004,5,16),stitchMat);cuffBand.position.z=-.018;glove.add(cuffBand);
+  c.add(glove);c.userData.glove=glove;c.userData.fingers=fingers;c.userData.thumbRoot=thumbRoot;c.userData.thumbJoint=thumbJoint;
   const ry=new T.Mesh(new T.BoxGeometry(.004,.004,1.2),new T.MeshBasicMaterial({color:'#ffd34d'}));ry.position.z=-.6;ry.visible=false;c.add(ry);c.userData.ray=ry;
   c.addEventListener('connected',e=>{c.userData.hand=e.data.handedness;});
   c.addEventListener('selectstart',()=>{if(MENU.open){menuClick(i);return;}G.hand=i;if(G.phase==='play')G.holding=i;act();buzz(.12,18);});
@@ -98,9 +124,13 @@ function bx(w,h,d,c,x,y,z,par){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c
 function limb(par,px,py,w,l,c){const g=new T.Group();g.position.set(px,py,0);bx(w,l,w,c,0,-l/2,0,g);par.add(g);return g;}
 function mk(c){const g=new T.Group(),b=new T.Group();g.add(b);g.b=b;
   bx(.7,.75,.4,c,0,1.2,0,b);bx(1,.28,.5,c,0,1.55,0,b);bx(.62,.3,.38,'#f2f2f2',0,.78,0,b);
+  // Layered shoulder pads and chest piping make players read better from VR distance.
+  const padMat=mat(c,.55);const padL=new T.Mesh(new T.SphereGeometry(.31,10,8),padMat);padL.scale.set(1,.55,.8);padL.position.set(-.39,1.55,0);b.add(padL);const padR=padL.clone();padR.position.x=.39;b.add(padR);
+  const stripe=new T.Mesh(new T.BoxGeometry(.08,.035,.43),new T.MeshStandardMaterial({color:'#f4f0d9',roughness:.6}));stripe.position.set(0,1.58,-.01);b.add(stripe);
   const h=new T.Group();h.position.set(0,1.98,0);b.add(h);
   const hm=new T.Mesh(new T.SphereGeometry(.27,14,10),mat(c,.35));hm.scale.set(1,1.05,1.12);hm.castShadow=true;h.add(hm);
   bx(.36,.06,.08,'#e6e6e6',0,-.08,.3,h);bx(.05,.22,.08,'#e6e6e6',0,-.03,.3,h);
+  const face=new T.Mesh(new T.TorusGeometry(.19,.018,5,12,Math.PI),new T.MeshStandardMaterial({color:'#d9b44a',metalness:.35,roughness:.45}));face.position.set(0,-.08,.29);face.rotation.z=Math.PI;h.add(face);
   g.aL=limb(b,-.6,1.58,.2,.8,'#d9a97e');g.aR=limb(b,.6,1.58,.2,.8,'#d9a97e');bx(.25,.38,.25,c,0,-.2,0,g.aL);bx(.25,.38,.25,c,0,-.2,0,g.aR);
   g.lL=limb(b,-.2,.85,.3,.85,'#f2f2f2');g.lR=limb(b,.2,.85,.3,.85,'#f2f2f2');bx(.32,.12,.42,'#222222',0,-.8,.05,g.lL);bx(.32,.12,.42,'#222222',0,-.8,.05,g.lR);
   g.ph=Math.random()*6;g.fall=0;S.add(g);G.ents.push(g);return g;}
@@ -123,7 +153,7 @@ function buzz(a,ms){const ss=R.xr.getSession();if(!ss)return;for(const i of ss.i
 const DIFFS=[{spd:.85,sack:8,int:.25,catchR:2.6,blk:.2},{spd:1,sack:6,int:.45,catchR:2.1,blk:.35},{spd:1.12,sack:4.8,int:.6,catchR:1.8,blk:.5},{spd:1.25,sack:3.8,int:.8,catchR:1.5,blk:.65}];
 const CFG={assist:.6,turn:'snap',vig:1};let D=DIFFS[1];
 function readCfg(){D=DIFFS[+$('diff').value];CFG.assist=+$('assist').value;CFG.turn=$('turn').value;CFG.vig=+$('vig').value;CFG.snd=+$('snd').value;CFG.power=+$('power').value;CFG.guide=+$('guide').value;const hi=$('gfx').value==='1';
-  R.shadowMap.enabled=hi;sun.castShadow=hi;R.setPixelRatio(hi?Math.min(devicePixelRatio,2):1);if(S.traverse)S.traverse(o=>{if(o.material)o.material.needsUpdate=true;});}
+  R.shadowMap.enabled=hi;sun.castShadow=hi;R.setPixelRatio(hi?Math.min(devicePixelRatio,1.4):1);if(S.traverse)S.traverse(o=>{if(o.material)o.material.needsUpdate=true;});}
 let AC=null,NB=null;
 function audio(){if(AC||!CFG.snd)return;try{AC=new (window.AudioContext||window.webkitAudioContext)();NB=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   const n=AC.createBufferSource();n.buffer=NB;n.loop=true;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=500;const g=AC.createGain();g.gain.value=.05;n.connect(f);f.connect(g);g.connect(AC.destination);n.start();}catch(e){AC=null;}}
@@ -136,8 +166,8 @@ function axes(){let tn=0,x=0,z=0;const ss=R.xr.getSession();
   const m=Math.hypot(x,z);if(m<.18)return[0,0,tn];if(m>1){x/=m;z/=m;}return[x,z,tn];}
 const ord=n=>['','1st','2nd','3rd','4th'][n]||n+'th';
 function yl(){const y=Math.round(50-G.los);return y>50?'opp '+(100-y):'own '+y;}
-function hud(msg){const c=hc.getContext('2d');c.clearRect(0,0,512,128);c.fillStyle='rgba(10,20,15,.75)';c.fillRect(0,0,512,128);
-  c.fillStyle='#fff';c.font='bold 26px sans-serif';c.fillText(`${G.you.name} ${G.sy}  -  ${G.sp} ${G.opp.name}`,14,36);
+function hud(msg){const c=hc.getContext('2d');c.clearRect(0,0,512,128);c.fillStyle='rgba(5,16,10,.88)';c.fillRect(0,0,512,128);c.fillStyle='#d9b44a';c.fillRect(0,0,6,128);
+  c.fillStyle='#fff';c.font='bold 25px sans-serif';c.fillText(`${G.you.name} ${G.sy}  -  ${G.sp} ${G.opp.name}`,14,36);
   c.font='22px sans-serif';c.fillText(`${ord(G.down)} & ${Math.max(1,Math.round(G.togo))}   ball on ${yl()}   Q${Math.min(4,G.q)} ${Math.max(0,Math.ceil(G.clk))}s`,14,70);
   c.fillStyle='#ffd34d';c.fillText(msg,14,106);tex.needsUpdate=true;}
 /* ---------- Game state ---------- */
@@ -179,7 +209,7 @@ function newGame(){
   paintField(G.mode==='def'?G.you:G.opp,G.mode==='def'?G.opp:G.you);readCfg();startPlay();}
 function clearEnts(){G.ents.forEach(m=>S.remove(m));G.ents=[];}
 function startPlay(){
-  clearEnts();losL.position.z=G.los;fdL.position.z=Math.max(-50,G.los-G.togo);G.phase='pre';G.t=0;G.carrier=null;G.pass=null;G.dive=0;G.spin=0;G.cool=0;G.press=0;G.msg='';
+  clearEnts();losL.position.z=G.los;fdL.position.z=Math.max(-50,G.los-G.togo);G.phase='pre';G.t=0;G.carrier=null;G.pass=null;G.dive=0;G.spin=0;G.truck=0;G.tackle=0;G.intWindow=0;G.cool=0;G.press=0;G.msg='';
   const L=G.los,offC=G.mode==='def'?G.opp.color:G.you.color,defC=G.mode==='def'?G.you.color:G.opp.color;
   G.off=[];G.def=[];
   for(let i=0;i<5;i++){const p=mk(offC);p.position.set(-4+2*i,0,L+1.2);G.off.push(p);}
@@ -206,6 +236,8 @@ function throwTo(r,raw){if(!r||G.mode!=='qb'||G.phase!=='play'||!G.pass||G.pass.
   if(raw){const k=1-CFG.assist;v.x=v.x*CFG.assist+raw.x*k;v.y=v.y*CFG.assist+raw.y*k;v.z=v.z*CFG.assist+raw.z*k;}
   G.pass={s:'fly',pos:a,v:v,b:b,r:r,t0:G.t};G.qb.th=.45;buzz(.5,60);snd('whoosh');}
 function flyStep(dt){const P=G.pass,v=P.v;P.pos.x+=v.x*dt;P.pos.y+=v.y*dt;P.pos.z+=v.z*dt;v.y-=10.7*dt;{const dr=1-.06*dt;v.x*=dr;v.z*=dr;}ball.position.copy(P.pos);ball.rotation.y=Math.atan2(-v.z,v.x);ball.rotation.x+=dt*25;
+  // Catch with either controller: hold trigger or grip and bring the glove within reach of the ball.
+  if(xr&&G.phase==='play'){for(let i=0;i<2;i++){const c=R.xr.getController(i),ss=R.xr.getSession();let grabbing=false;if(ss)for(const src of ss.inputSources){if(src.handedness!==c.userData.hand||!src.gamepad)continue;const b=src.gamepad.buttons||[];grabbing=!!((b[0]&&b[0].pressed)||(b[1]&&b[1].pressed));}const hp=handPos(i);if(grabbing&&hp.distanceTo(P.pos)<.38&&P.pos.y>.25){G.hand=i;G.holding=i;P.pos.copy(hp);ball.position.copy(hp);buzz(.85,75);snd('whoosh');if(G.mode==='qb'){G.pass={s:'drop'};hud('Caught! Hold trigger, swing, release');}else{G.carrier=G.user;G.pass.s='done';hud('Caught! Run with the ball');}return false;}}}
   if(P.pos.y<3.3){for(const d of G.def){if(!d.rolled&&dist(d.position,P.pos)<1.4){d.rolled=1;if(Math.random()<D.int){d.ct=.5;end('Intercepted',0,true);return true;}}}
     for(const r of G.rec){if(dist(r.position,P.pos)<D.catchR&&P.pos.y>.3){r.ct=.6;G.carrier=r;P.s='done';buzz(.8,90);snd('whoosh');return false;}}}
   if(P.pos.y<.25||Math.abs(P.pos.x)>27||P.pos.z<-62||G.t-P.t0>4){end('Incomplete',0);return true;}return false;}
@@ -232,10 +264,15 @@ function end(msg,gain,turnover,td){
   hud(m+` (${gain>=0?'+':''}${Math.round(gain)} yd)`);}
 function act(){
   if(G.phase==='pre')return snap();
-  if(G.phase!=='play')return;
-  if(G.mode==='def'&&G.cool<=0){G.dive=.45;G.cool=1.6;G.user.dv=.45;}
-  else if(G.mode==='rb'&&G.cool<=0){G.spin=.5;G.cool=1.8;}
-  else if(G.mode==='wr'){G.press=.5;G.user.ct=.5;}}
+  if(G.phase!=='play'||G.cool>0)return;
+  if(G.mode==='def'){
+    // A short, forgiving tackle window: get close and press the action button.
+    G.dive=.62;G.tackle=.72;G.intWindow=.9;G.cool=1.25;G.user.dv=.62;
+    hud('Tackle / interception attempt!');buzz(.35,45);
+  } else if(G.mode==='rb'){
+    if(G.carrier===G.rb||G.carrier===G.user){G.truck=.8;G.spin=0;G.cool=2.0;hud('TRUCKING!');buzz(.5,60);}
+    else {G.spin=.5;G.cool=1.8;hud('Juke!');}
+  } else if(G.mode==='wr'){G.press=.5;G.user.ct=.5;G.intWindow=.4;G.cool=.7;}}
 /* ---------- Update ---------- */
 const fwd=new T.Vector3();
 function update(dt){
@@ -246,8 +283,9 @@ function update(dt){
   G.vgT=(G.vgT||0)-dt;vg.material.opacity+=((xr&&CFG.vig&&((ax||az)||G.vgT>0)?.6:0)-vg.material.opacity)*Math.min(1,dt*8);
   cam.getWorldDirection(fwd);let fx=fwd.x,fz=fwd.z;const fm=Math.hypot(fx,fz)||1;fx/=fm;fz/=fm;
   const dx=fx*-az+(-fz)*ax,dz=fz*-az+fx*ax;
-  G.cool-=dt;G.dive-=dt;G.spin-=dt;G.press-=dt;
+  G.cool-=dt;G.dive-=dt;G.spin-=dt;G.truck-=dt;G.tackle-=dt;G.intWindow-=dt;G.press-=dt;
   if(xr&&G.hist)for(let i=0;i<2;i++){const h=G.hist[i];h.push({t:performance.now(),p:handPos(i)});if(h.length>10)h.shift();}
+  if(xr){const ss=R.xr.getSession();for(let i=0;i<2;i++){const c=R.xr.getController(i);let trig=0,grip=0;if(ss)for(const src of ss.inputSources){if(src.handedness!==c.userData.hand||!src.gamepad)continue;const b=src.gamepad.buttons||[];trig=b[0]?b[0].value||0:0;grip=b[1]?b[1].value||0:0;}const curl=Math.max(trig*.9,grip);for(let f=0;f<(c.userData.fingers||[]).length;f++){const q=c.userData.fingers[f];q.root.rotation.x=-.12-curl*.65;q.joint.rotation.x=-curl*.85;}if(c.userData.thumbRoot)c.userData.thumbRoot.rotation.y=-.6-curl*.45;if(c.userData.thumbJoint)c.userData.thumbJoint.rotation.x=-curl*.5;}}
   gl.visible=false;
   if(xr&&CFG.guide&&G.mode==='qb'&&G.phase==='play'&&G.holding>=0&&G.pass&&G.pass.s==='drop'){const rv=rawVel(G.holding);if(rv&&rv.length()>3){gl.geometry.setFromPoints(traj(handPos(G.holding),rv));gl.visible=true;}}
   if(G.mode==='qb'&&G.phase==='pre'){if(Math.abs(ax)>.7&&!G.lk){G.lk=1;cyc(ax>0?1:-1);}else if(Math.abs(ax)<.3)G.lk=0;}
@@ -285,7 +323,10 @@ function update(dt){
           if(G.mode==='wr')G.pass.b.set(w.position.x+G.uv.x*.95,.9,w.position.z+G.uv.z*.95);}
       }else if(G.pass.s==='air'){
         const k=Math.min(1,(t-G.pass.t0)/(G.pass.T||.95));ball.position.lerpVectors(G.pass.a,G.pass.b,k);ball.position.y+=Math.sin(k*Math.PI)*2.4+.9;
-        if(G.mode==='def'&&dist(u.position,ball.position)<1.7&&k>.35)return end('Intercepted!',0,true);
+        if(G.mode==='def'&&dist(u.position,ball.position)<(G.intWindow>0?2.25:1.05)&&k>.28){
+          G.carrier=u;G.pass.s='done';ball.position.set(u.position.x,1.2,u.position.z);buzz(.9,100);snd('cheer');
+          return end('INTERCEPTION!',0,true);
+        }
         if(k>=1){const bb=G.pass.b;
           if(G.mode==='wr'){if(G.press>0&&dist(u.position,bb)<2.6){G.carrier=u;}else return end('Incomplete',0);}
           else{const near=G.def.some(d=>d!==u&&dist(d.position,bb)<1.4);
@@ -298,7 +339,7 @@ function update(dt){
     const cc=G.carrier;if(cc){ball.position.set(cc.position.x,1.2,cc.position.z);}
     if(!cc&&G.isPass)G.off.slice(0,5).forEach(o=>{let nd=null,bd=99;G.def.forEach(d=>{if(d.role==='dl'||d.role==='lb'){const q=Math.abs(d.position.x-o.position.x)+Math.abs(d.position.z-o.position.z)*.5;if(q<bd){bd=q;nd=d;}}});if(nd&&Math.abs(nd.position.x-o.position.x)>.2)mv(o,nd.position.x-o.position.x,0,4,dt);});
     // defense AI
-    G.def.forEach(d=>{if(d===u&&(G.mode==='def'))return;
+    G.def.forEach(d=>{if(d===u&&(G.mode==='def'))return;if(d.stun>0)return;
       let tx,tz;
       if(cc){tx=cc.position.x+(cc.vx||0)*.25;tz=cc.position.z+(cc.vz||0)*.25;}
       else if(G.pass&&(G.pass.s==='air'||G.pass.s==='fly')){tx=G.pass.b.x;tz=G.pass.b.z;}
@@ -311,11 +352,26 @@ function update(dt){
       const px=cc.position.x;
       if(Math.abs(px)>=26)return end('Out of bounds',G.los-cc.position.z);
       if(cc.position.z<=-50)return end('Score',G.los-cc.position.z,false,true);
+      // Trucking: an activated ball carrier knocks nearby defenders off their line.
+      if(G.truck>0&&(cc===u||G.mode==='rb')){
+        for(const d of G.def){const q=dist(d.position,cc.position);if(q<2.05){
+          const away=new T.Vector3(d.position.x-cc.position.x,0,d.position.z-cc.position.z);
+          if(away.length()<.01)away.set(Math.random()-.5,0,1);
+          away.normalize();d.position.x+=away.x*1.15;d.position.z+=away.z*1.15;d.dv=.7;d.stun=.85;
+        }}
+      }
       if(!(cc===u&&G.spin>0)){
-        for(const d of G.def){const r=(d===u&&G.dive>0)?2:1;
-          if(dist(d.position,cc.position)<r){d.dv=.35;return end(d===u?'You made the tackle':'Tackled',G.los-cc.position.z);}}}}
+        for(const d of G.def){
+          if(d.stun>0)continue;
+          const active=(d===u&&G.tackle>0),r=active?2.35:0.9;
+          if(dist(d.position,cc.position)<r){
+            d.dv=.45;cc.fall=.25;return end(d===u?'BIG TACKLE!':'Tackled',G.los-cc.position.z);
+          }
+        }
+      }
+    }
   }else if(G.phase==='over'){G.t+=dt;if(G.t>2.2){if(G.clk<=0){G.q++;G.clk=120;}if(G.q>4)gameOver();else startPlay();}}
-  G.ents.forEach(q=>{if(q.aL)anim(q,dt);});
+  G.ents.forEach(q=>{if(q.aL)anim(q,dt);if(q.stun>0)q.stun=Math.max(0,q.stun-dt);});
   rig.position.set(u.position.x,0,u.position.z);
   if(!G.carrier&&!(G.pass&&(G.pass.s==='air'||G.pass.s==='fly')))ball.position.copy(xr&&G.mode==='qb'?handPos(G.holding>=0?G.holding:domHand()):new T.Vector3(G.qb.position.x,1.3,G.qb.position.z));
 }
