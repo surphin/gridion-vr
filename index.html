@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Gridiron VR — Ultimate Edition</title>
+<title>Gridiron VR — Field Edition</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#07110c;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#f5f7ef}
 body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 15%,rgba(45,125,71,.28),transparent 58%),linear-gradient(145deg,#07110c,#10281a 55%,#08130d)}
@@ -10,7 +10,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:rad
 @keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 #box{position:relative;width:min(560px,92vw);padding:clamp(24px,5vw,42px);max-height:92vh;overflow:auto;border:1px solid rgba(210,235,209,.25);border-radius:28px;background:linear-gradient(155deg,rgba(26,57,36,.97),rgba(5,16,10,.99));box-shadow:0 32px 110px #000b,inset 0 1px rgba(255,255,255,.12),0 0 0 1px #d9b44a0b;animation:cardIn .55s cubic-bezier(.2,.8,.2,1) both}
-#box:before{content:"FIELD • VR FOOTBALL";display:inline-block;color:#d9b44a;font:800 11px/1 system-ui;letter-spacing:.22em;margin-bottom:14px}
+#box:before{content:"GRIDIRON VR • FIELD EDITION";display:inline-block;color:#d9b44a;font:800 11px/1 system-ui;letter-spacing:.22em;margin-bottom:14px}
+#box{isolation:isolate}#box:after{content:"QB  /  DEFENSE  /  RUNNING BACK  /  RECEIVER";display:block;margin-top:18px;padding:11px 12px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff06;color:#d5e2d4;font-size:9px;font-weight:800;letter-spacing:.12em;text-align:center}
 h1{font-size:clamp(34px,7vw,48px);letter-spacing:-.055em;line-height:1.02;margin:0 0 12px;background:linear-gradient(90deg,#fff,#c7e9ce);-webkit-background-clip:text;background-clip:text;color:transparent}
 p{margin:0 0 20px;color:#c5d3c6;line-height:1.6;font-size:14px}
 label{display:block;margin:12px 0 4px;font-size:15px}
@@ -22,12 +23,16 @@ button:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 14p
 small{display:block;margin-top:16px;color:#a6b9a8;line-height:1.55;font-size:11px}
 </style></head><body>
 <div id="menu"><div id="box">
-<h1>Gridiron VR</h1>
-<p>Take the field in quarterback, defense, running back, or receiver mode. Read the defense, make the play, and chase the end zone. Built for controller-based VR with throwing, catches, sprinting, and floating in-game controls.</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#ffe78a,#bd8d25);color:#102116;font-size:25px;font-weight:1000;box-shadow:0 8px 24px #d9b44a30">G</div><div><div style="font-size:10px;letter-spacing:.22em;color:#d9b44a;font-weight:900;margin-bottom:4px">VR FOOTBALL SIMULATOR</div><h1 style="margin:0">Gridiron VR</h1></div></div>
+<p>Read the defense. Win the matchup. Finish the drive. Choose a role and take the field in a controller-driven VR football game with passing, catching, pursuit, blocking, and arm-swing sprinting.</p>
+<label for="gloveStyle" style="display:block;text-align:left;margin:16px 0 7px;color:#d5e2d4;font-size:11px;font-weight:800;letter-spacing:.12em">GLOVE COLORWAY</label>
+<select id="gloveStyle" aria-label="Football glove style">
+<option value="stealth">Stealth — Black / White</option><option value="storm" selected>Storm — Grey / White (reference inspired)</option><option value="blaze">Blaze — Red / Black</option><option value="royal">Royal — Blue / White</option><option value="volt">Volt — Neon / Black</option><option value="ice">Ice — White / Silver</option><option value="gold">Gold — Black / Gold</option><option value="custom">Field Green — Green / White</option>
+</select>
 <button id="enter">ENTER THE FIELD&nbsp; →</button>
 <div id="err" style="margin-top:12px;color:#ff9a8a;font-size:14px"></div>
 <div id="diag" style="margin-top:14px;font-size:14px;opacity:.85;line-height:1.6"></div>
-<small>Open this page in the Meta Quest Browser (or another WebXR browser) over HTTPS. It will not start inside a preview frame or from a plain http:// address. In VR: compact football gloves track both controllers; left stick moves, click for a capped sprint, swing your arms while moving for a faster capped burst, right stick turns, hold/release trigger to throw, bring a glove close to the ball while holding trigger or grip to catch, and X or Y opens the menu. Defense action attempts tackles and interceptions; running-back action trucks nearby defenders. For smoother Quest performance, choose Low graphics in the floating menu.</small>
+<small>Open this page in the Meta Quest Browser (or another WebXR browser) over HTTPS. It will not start inside a preview frame or from a plain http:// address. In VR: football gloves follow your tracked hands; left stick moves, a deliberate arm swing while moving gives a controlled speed boost, right stick turns, hold/release trigger to throw, and bring a glove near the ball while holding trigger or grip to catch. X/Y opens the in-game menu. Defense action attempts tackles and interceptions; running-back action pushes through contact. For smoother Quest performance, select Low graphics in the floating menu.</small>
 </div></div>
 <div id="store" hidden>
 <select id="mode"><option value="qb">Quarterback</option><option value="def">Defense</option><option value="rb">Running back</option><option value="wr">Receiver</option></select>
@@ -97,37 +102,60 @@ let xr=false;
 R.xr.addEventListener('sessionstart',()=>{xr=true;cam.position.set(0,0,0);cam.rotation.set(0,0,0);rig.rotation.y=0;$('menu').style.display='none';MENU.pend=25;});
 R.xr.addEventListener('sessionend',()=>{xr=false;DESK();$('menu').style.display='flex';closeMenu();G.paused=true;});
 addEventListener('resize',()=>{R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();});
-for(let i=0;i<2;i++){const c=R.xr.getController(i);
-  // Detailed stylized receiver glove with articulated finger segments; driven by controller trigger/grip.
-  const glove=new T.Group(),gloveMat=new T.MeshStandardMaterial({color:'#f3c744',roughness:.62,metalness:.02}),stitchMat=new T.MeshStandardMaterial({color:'#ffffff',roughness:.7});
-  const palm=new T.Mesh(new T.SphereGeometry(.048,18,12),gloveMat);palm.scale.set(1.0,.48,1.12);palm.position.set(0,-.012,-.075);glove.add(palm);
-  const backPlate=new T.Mesh(new T.SphereGeometry(.039,14,10),new T.MeshStandardMaterial({color:'#263b2b',roughness:.6,metalness:.05}));backPlate.scale.set(1.0,.16,1.0);backPlate.position.set(0,.018,-.082);glove.add(backPlate);
-  const knuckleMat=new T.MeshStandardMaterial({color:'#52634a',roughness:.78});for(let k=0;k<4;k++){const kn=new T.Mesh(new T.SphereGeometry(.012,9,7),knuckleMat);kn.scale.set(1,.75,1.15);kn.position.set((k-1.5)*.025,.018,-.112);glove.add(kn);}
-  const fingers=[];
-  for(let f=0;f<4;f++){
-    const root=new T.Group();root.position.set((f-1.5)*.025,-.002,-.115);glove.add(root);
-    const len=f===3?.052:.064,seg1=new T.Mesh(new T.CylinderGeometry(.0065,.0065,.038,7),gloveMat);seg1.rotation.x=Math.PI/2;seg1.position.z=-len*.22;root.add(seg1);
-    const joint=new T.Group();joint.position.z=-len*.48;root.add(joint);
-    const seg2=new T.Mesh(new T.CylinderGeometry(.006,.006,.032,7),gloveMat);seg2.rotation.x=Math.PI/2;seg2.position.z=-.025;joint.add(seg2);
-    const tip=new T.Mesh(new T.SphereGeometry(.007,10,7),gloveMat);tip.position.z=-.044;joint.add(tip);const nail=new T.Mesh(new T.BoxGeometry(.009,.002,.012),stitchMat);nail.position.set(0,.007,-.044);joint.add(nail);
-    fingers.push({root,joint,baseZ:(f-1.5)*.025});
-  }
-  const thumbRoot=new T.Group();thumbRoot.position.set(-.052,-.012,-.075);thumbRoot.rotation.y=-.6;glove.add(thumbRoot);
-  const thumb1=new T.Mesh(new T.CylinderGeometry(.011,.011,.053,7),gloveMat);thumb1.rotation.x=Math.PI/2;thumb1.position.z=-.018;thumbRoot.add(thumb1);
-  const thumbJoint=new T.Group();thumbJoint.position.z=-.038;thumbRoot.add(thumbJoint);
-  const thumb2=new T.Mesh(new T.CylinderGeometry(.009,.009,.044,7),gloveMat);thumb2.rotation.x=Math.PI/2;thumb2.position.z=-.018;thumbJoint.add(thumb2);
-  const cuff=new T.Mesh(new T.CylinderGeometry(.034,.038,.052,12),new T.MeshStandardMaterial({color:'#d9b44a',roughness:.7}));cuff.rotation.x=Math.PI/2;cuff.position.z=.005;glove.add(cuff);
-  const cuffBand=new T.Mesh(new T.TorusGeometry(.036,.0025,5,16),stitchMat);cuffBand.position.z=-.018;glove.add(cuffBand);
-  const gripSpace=R.xr.getControllerGrip(i);
-  // Attach the visible hand to both tracked spaces: grip space is the physical hand pose; target-ray is a fallback.
-  glove.position.set(0,-.025,-.055);glove.scale.setScalar(.92);glove.visible=true;glove.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.renderOrder=20;o.material.depthTest=true;}});
-  const gripGlove=glove.clone(true);gripGlove.position.set(0,-.025,-.055);gripGlove.scale.setScalar(.92);gripGlove.visible=true;gripGlove.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.renderOrder=20;}});
-  c.add(glove);S.add(gripSpace);gripSpace.add(gripGlove);
-  c.userData.glove=glove;c.userData.gripGlove=gripGlove;c.userData.gripSpace=gripSpace;c.userData.fingers=fingers;c.userData.thumbRoot=thumbRoot;c.userData.thumbJoint=thumbJoint;
-  const ry=new T.Mesh(new T.BoxGeometry(.004,.004,1.2),new T.MeshBasicMaterial({color:'#ffd34d'}));ry.position.z=-.6;ry.visible=false;c.add(ry);c.userData.ray=ry;
-  c.addEventListener('connected',e=>{c.userData.hand=e.data.handedness;});
-  c.addEventListener('selectstart',()=>{if(MENU.open){menuClick(i);return;}G.hand=i;if(G.phase==='play')G.holding=i;act();buzz(.12,18);});
-  c.addEventListener('squeezestart',()=>handoff());c.addEventListener('selectend',()=>vrThrow(i));S.add(c);}
+const gloveRigs=[];
+const GLOVE_STYLES={
+ stealth:{base:'#202226',panel:'#34383e',accent:'#f5f5f2',palm:'#181a1d',cuff:'#f5f5f2',stitch:'#aeb3b9'},
+ storm:{base:'#b9bbc0',panel:'#e0e1e3',accent:'#f7f7f6',palm:'#8f9298',cuff:'#a6a9ae',stitch:'#73777d'},
+ blaze:{base:'#bd2634',panel:'#e5e1df',accent:'#202126',palm:'#8c1723',cuff:'#202126',stitch:'#f5f1ef'},
+ royal:{base:'#2457b8',panel:'#3976d8',accent:'#f7f7f2',palm:'#173d8a',cuff:'#f7f7f2',stitch:'#dce7ff'},
+ volt:{base:'#b8e52b',panel:'#d6f477',accent:'#202126',palm:'#7d9c17',cuff:'#202126',stitch:'#f4ffd7'},
+ ice:{base:'#f0f1f2',panel:'#ffffff',accent:'#8c929b',palm:'#c8cbd0',cuff:'#d9dce0',stitch:'#9298a0'},
+ gold:{base:'#242321',panel:'#3b3933',accent:'#d7ad45',palm:'#171715',cuff:'#d7ad45',stitch:'#f1d88b'},
+ custom:{base:'#246b42',panel:'#39885a',accent:'#f1f5ed',palm:'#174b2d',cuff:'#f1f5ed',stitch:'#a8d9b7'}
+};
+function gloveMaterial(color,roughness=.72){return new T.MeshStandardMaterial({color,roughness,metalness:0});}
+function buildFootballGlove(){
+ const root=new T.Group();
+ const fabric=gloveMaterial('#b9bbc0',.92), panel=gloveMaterial('#e0e1e3',.88), grip=gloveMaterial('#8f9298',.82), accent=gloveMaterial('#f7f7f6',.72), stitch=gloveMaterial('#73777d',.8);
+ const add=(geo,mat,pos,scale,part)=>{const m=new T.Mesh(geo,mat);m.position.set(...pos);if(scale)m.scale.set(...scale);m.castShadow=true;m.frustumCulled=false;m.renderOrder=20;m.material.depthTest=false;m.userData.glovePart=part;root.add(m);return m;};
+ // Low-profile palm and layered back-of-hand panel, with padded fingers rather than a cartoon fist.
+ add(new T.SphereGeometry(1,20,14),fabric,[0,-.005,-.068],[.052,.018,.067],'base');
+ add(new T.SphereGeometry(1,20,14),panel,[0,.012,-.078],[.047,.007,.054],'panel');
+ add(new T.BoxGeometry(.069,.003,.022),grip,[0,-.020,-.074],[1,1,1],'palm');
+ // Four slightly tapered, rounded textile fingers with segmented padding and raised grip bands.
+ const fingerXs=[-.036,-.012,.012,.036], fingerLens=[.067,.078,.076,.064];
+ fingerXs.forEach((x,i)=>{const len=fingerLens[i],w=i===1||i===2?.014:.013;
+   add(new T.CapsuleGeometry(w*.66,len*.30,4,8),fabric,[x,.001,-.127-len*.15],[1,1,1],'base');
+   add(new T.CapsuleGeometry(w*.62,len*.22,4,8),panel,[x,.009,-.126-len*.15],[1,.72,1],'panel');
+   for(let b=0;b<3;b++)add(new T.BoxGeometry(w*1.45,.003,.009),accent,[x,.016,-.112-b*.021],'','accent');
+   add(new T.SphereGeometry(w*.66,10,8),fabric,[x,.002,-.127-len*.62],[1,.8,1],'base');
+ });
+ // Thumb angled out from the palm; stitched side seam and wrist cuff.
+ const thumb=add(new T.CapsuleGeometry(.012,.052,4,9),fabric,[-.064,-.001,-.084],[1,1,1],'base');thumb.rotation.y=-.72;thumb.rotation.x=-.12;
+ const thumbPanel=add(new T.CapsuleGeometry(.008,.043,4,8),panel,[-.067,.007,-.086],[1,.7,1],'panel');thumbPanel.rotation.y=-.72;thumbPanel.rotation.x=-.12;
+ add(new T.CylinderGeometry(.035,.038,.038,16),grip,[0,-.002,-.015],[1,1,1],'cuff').rotation.x=Math.PI/2;
+ add(new T.TorusGeometry(.036,.0028,6,20),stitch,[0,-.002,-.035],[1,1,1],'stitch').rotation.x=Math.PI/2;
+ // Small raised angular mark and wrist strap give it the premium receiver-glove look without a copied brand logo.
+ add(new T.BoxGeometry(.024,.003,.009),accent,[0,.021,-.046],[1,1,1],'accent').rotation.z=-.28;
+ add(new T.BoxGeometry(.036,.004,.014),panel,[0,-.025,.005],[1,1,1],'panel');
+ root.userData.materials={base:fabric,panel, palm:grip, accent, cuff:grip, stitch};
+ root.scale.setScalar(.82);root.position.set(0,-.012,-.045);
+ return root;
+}
+function applyGloveStyle(style){const pal=GLOVE_STYLES[style]||GLOVE_STYLES.storm;for(const g of gloveRigs){g.traverse(o=>{if(!o.isMesh)return;const c=pal[o.userData.glovePart]||pal.base;o.material.color.set(c);if(o.userData.glovePart==='stitch')o.material.color.set(pal.stitch);});}}
+for(let i=0;i<2;i++){
+ const c=R.xr.getController(i),gripSpace=R.xr.getControllerGrip(i);
+ const glove=buildFootballGlove();
+ // Use the grip-space pose as the primary hand pose; hide the ray-space duplicate when grip tracking is available.
+ const gripGlove=glove.clone(true);gripGlove.userData.isGripClone=true;
+ c.add(glove);rig.add(gripSpace);gripSpace.add(gripGlove);
+ c.userData.glove=glove;c.userData.gripGlove=gripGlove;c.userData.gripSpace=gripSpace;c.userData.fingers=[];c.userData.thumbRoot=null;c.userData.thumbJoint=null;
+ gloveRigs.push(glove,gripGlove);
+ c.addEventListener('connected',e=>{c.userData.hand=e.data.handedness;});
+ c.addEventListener('selectstart',()=>{if(MENU.open){menuClick(i);return;}G.hand=i;if(G.phase==='play')G.holding=i;act();buzz(.12,18);});
+ c.addEventListener('squeezestart',()=>handoff());c.addEventListener('selectend',()=>vrThrow(i));rig.add(c);
+}
+$('gloveStyle').addEventListener('change',e=>applyGloveStyle(e.target.value));applyGloveStyle($('gloveStyle').value);
 /* ---------- Helpers ---------- */
 const MAT={};const mat=(c,r)=>MAT[c+r]||(MAT[c+r]=new T.MeshStandardMaterial({color:c,roughness:r||.75}));
 function bx(w,h,d,c,x,y,z,par){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);m.castShadow=true;par.add(m);return m;}
@@ -162,7 +190,8 @@ function anim(p,dt){const dx=p.position.x-(p.lx===undefined?p.position.x:p.lx),d
   else if(p.ct>0){p.ct-=dt;al=ar=-2.7;}
   p.b.rotation.x=lean;p.aL.rotation.x=al;p.aR.rotation.x=ar;p.lL.rotation.x=lw;p.lR.rotation.x=-lw;
   p.b.rotation.y=(p===G.user&&G.spin>0)?p.b.rotation.y+dt*14:0;}
-const hv=new T.Vector3();function handPos(i){const c=R.xr.getController(i);c.updateWorldMatrix(true,false);const p=c.getWorldPosition(new T.Vector3());const q=c.getWorldQuaternion(new T.Quaternion());return p.add(new T.Vector3(0,-.025,-.11).applyQuaternion(q));}
+const hv=new T.Vector3();function handPos(i){const c=R.xr.getController(i),g=c.userData.gripSpace;const src=g&&g.visible?g:c;src.updateWorldMatrix(true,false);const p=src.getWorldPosition(new T.Vector3());const q=src.getWorldQuaternion(new T.Quaternion());return p.add(new T.Vector3(0,-.025,-.085).applyQuaternion(q));}
+function handTrackPos(i){const c=R.xr.getController(i);return c.position.clone();}
 function buzz(a,ms){const ss=R.xr.getSession();if(!ss)return;for(const i of ss.inputSources){const h=i.gamepad&&i.gamepad.hapticActuators;try{if(h&&h[0])h[0].pulse(a,ms);}catch(e){}}}
 const DIFFS=[{spd:.85,sack:8,int:.25,catchR:2.6,blk:.2},{spd:1,sack:6,int:.45,catchR:2.1,blk:.35},{spd:1.12,sack:4.8,int:.6,catchR:1.8,blk:.5},{spd:1.25,sack:3.8,int:.8,catchR:1.5,blk:.65}];
 const CFG={assist:.6,turn:'snap',vig:1};let D=DIFFS[1];
@@ -304,8 +333,8 @@ function update(dt){
   cam.getWorldDirection(fwd);let fx=fwd.x,fz=fwd.z;const fm=Math.hypot(fx,fz)||1;fx/=fm;fz/=fm;
   const dx=fx*-az+(-fz)*ax,dz=fz*-az+fx*ax;
   G.cool-=dt;G.dive-=dt;G.spin-=dt;G.truck-=dt;G.tackle-=dt;G.intWindow-=dt;G.press-=dt;
-  if(xr&&G.hist)for(let i=0;i<2;i++){const h=G.hist[i];h.push({t:performance.now(),p:handPos(i)});while(h.length>2&&performance.now()-h[0].t>180)h.shift();if(h.length>12)h.shift();}
-  if(xr){const ss=R.xr.getSession();for(let i=0;i<2;i++){const c=R.xr.getController(i);if(c.userData.glove)c.userData.glove.visible=true;if(c.userData.gripGlove)c.userData.gripGlove.visible=true;let trig=0,grip=0;if(ss)for(const src of ss.inputSources){if(src.handedness!==c.userData.hand||!src.gamepad)continue;const b=src.gamepad.buttons||[];trig=b[0]?b[0].value||0:0;grip=b[1]?b[1].value||0:0;}const curl=Math.max(trig*.9,grip);for(let f=0;f<(c.userData.fingers||[]).length;f++){const q=c.userData.fingers[f];q.root.rotation.x=-.12-curl*.65;q.joint.rotation.x=-curl*.85;}if(c.userData.thumbRoot)c.userData.thumbRoot.rotation.y=-.6-curl*.45;if(c.userData.thumbJoint)c.userData.thumbJoint.rotation.x=-curl*.5;}}
+  if(xr&&G.hist)for(let i=0;i<2;i++){const h=G.hist[i];h.push({t:performance.now(),p:handTrackPos(i)});while(h.length>2&&performance.now()-h[0].t>180)h.shift();if(h.length>12)h.shift();}
+  if(xr){const ss=R.xr.getSession();for(let i=0;i<2;i++){const c=R.xr.getController(i),gs=c.userData.gripSpace;if(c.userData.glove)c.userData.glove.visible=true;if(c.userData.gripGlove)c.userData.gripGlove.visible=true;let trig=0,grip=0;const sources=ss?Array.from(ss.inputSources):[];const src=sources.find(v=>v.handedness===c.userData.hand)||(i===0?sources.find(v=>v.handedness==='left'):sources.find(v=>v.handedness==='right'));if(src){c.userData.hand=src.handedness;if(src.gamepad){const b=src.gamepad.buttons||[];trig=b[0]?b[0].value||0:0;grip=b[1]?b[1].value||0:0;}}if(gs){gs.visible=!!src&&!!src.gripSpace;}if(c.userData.gripGlove)c.userData.gripGlove.visible=!!src&&!!src.gripSpace;if(c.userData.glove)c.userData.glove.visible=!!src;const curl=Math.max(trig*.9,grip);for(let f=0;f<(c.userData.fingers||[]).length;f++){const q=c.userData.fingers[f];q.root.rotation.x=-.12-curl*.65;q.joint.rotation.x=-curl*.85;}if(c.userData.thumbRoot)c.userData.thumbRoot.rotation.y=-.6-curl*.45;if(c.userData.thumbJoint)c.userData.thumbJoint.rotation.x=-curl*.5;}}
   gl.visible=false;
   if(xr&&CFG.guide&&G.mode==='qb'&&G.phase==='play'&&G.holding>=0&&G.pass&&G.pass.s==='drop'){const rv=rawVel(G.holding);if(rv&&rv.length()>3){gl.geometry.setFromPoints(traj(handPos(G.holding),rv));gl.visible=true;}}
   if(G.mode==='qb'&&G.phase==='pre'){if(Math.abs(ax)>.7&&!G.lk){G.lk=1;cyc(ax>0?1:-1);}else if(Math.abs(ax)<.3)G.lk=0;}
@@ -315,11 +344,11 @@ function update(dt){
     let swing=0;if(xr&&G.hist){for(let hi=0;hi<2;hi++){const vv=handVel(hi);if(vv){const speed=Math.hypot(vv.x,vv.y,vv.z);if(speed>swing)swing=speed;}}}
     const stick=Math.min(1,Math.hypot(ax,az));
     // Firm speed limits: normal running stays controlled; deliberate arm swings unlock a modest extra burst.
-    const armSprint=xr&&stick>.12&&swing>1.05;
-    const baseCap=5.2,buttonCap=6.0,armCap=7.1;
-    const targetSpeed=Math.min(armSprint?armCap:(buttonSprint?buttonCap:baseCap),usp*(armSprint?1.0:(buttonSprint?1.0:.78))*stick);
+    const armSprint=xr&&stick>.18&&swing>.62;
+    const baseCap=3.7,buttonCap=4.45,armCap=5.45;
+    const targetSpeed=Math.min(armSprint?armCap:(buttonSprint?buttonCap:baseCap),usp*(armSprint?1.0:(buttonSprint?1.0:.72))*stick);
     const targetX=stick>0?dx/Math.max(1e-4,Math.hypot(dx,dz))*targetSpeed:0,targetZ=stick>0?dz/Math.max(1e-4,Math.hypot(dx,dz))*targetSpeed:0;
-    const blend=1-Math.exp(-dt*(stick>0?8:5));G.locoVel.x+=(targetX-G.locoVel.x)*blend;G.locoVel.z+=(targetZ-G.locoVel.z)*blend;
+    const blend=1-Math.exp(-dt*(stick>0?6.5:4.5));G.locoVel.x+=(targetX-G.locoVel.x)*blend;G.locoVel.z+=(targetZ-G.locoVel.z)*blend;
     // Clamp actual velocity too, so momentum can never exceed the current mode's cap.
     const activeCap=armSprint?armCap:(buttonSprint?buttonCap:baseCap),actualSpeed=Math.hypot(G.locoVel.x,G.locoVel.z);if(actualSpeed>activeCap){G.locoVel.x*=activeCap/actualSpeed;G.locoVel.z*=activeCap/actualSpeed;}
     u.position.x+=G.locoVel.x*dt;u.position.z+=G.locoVel.z*dt;
